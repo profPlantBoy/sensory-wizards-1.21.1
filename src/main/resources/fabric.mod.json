@@ -1,0 +1,40 @@
+{
+	"schemaVersion": 1,
+	"id": "sensorywizards",
+	"version": "${version}",
+	"name": "Sensory Wizards",
+	"description": "An mod in testing about wizardry with wands!",
+	"authors": [
+		"ProfPlantBoy"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "MIT",
+	"icon": "assets/sensorywizards/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.profplantboy.sensorywizards.SensoryWizards"
+		],
+		"fabric-datagen": [
+			"net.profplantboy.sensorywizards.SensoryWizardsDataGenerator"
+		],
+      "client": [
+        "net.profplantboy.sensorywizards.SensoryWizardsClient"
+      ]
+	},
+	"mixins": [
+		"sensorywizards.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.17.2",
+		"minecraft": "~1.21.1",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
