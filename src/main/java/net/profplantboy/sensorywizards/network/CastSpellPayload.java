@@ -17,7 +17,7 @@ public record CastSpellPayload(String spellId) implements CustomPayload {
     public void write(RegistryByteBuf buf) {
         buf.writeString(this.spellId);
     }
-
+// This is a comment to push and test a commit
     @Override
     public Id<? extends CustomPayload> getId() {
         return ID;
