@@ -14,17 +14,20 @@
 	"license": "MIT",
 	"icon": "assets/sensorywizards/icon.png",
 	"environment": "*",
-	"entrypoints": {
-		"main": [
-			"net.profplantboy.sensorywizards.SensoryWizards"
-		],
-		"fabric-datagen": [
-			"net.profplantboy.sensorywizards.SensoryWizardsDataGenerator"
-		],
-      "client": [
-        "net.profplantboy.sensorywizards.SensoryWizardsClient"
-      ]
-	},
+  "entrypoints": {
+    "main": [
+      "net.profplantboy.sensorywizards.SensoryWizards"
+    ],
+    "fabric-datagen": [
+      "net.profplantboy.sensorywizards.SensoryWizardsDataGenerator"
+    ],
+    "client": [
+      "net.profplantboy.sensorywizards.SensoryWizardsClient"
+    ],
+    "cardinal-components": [
+      "net.profplantboy.sensorywizards.PlayerComponentInitializer"
+    ]
+  },
 	"mixins": [
 		"sensorywizards.mixins.json"
 	],
@@ -32,6 +35,7 @@
 		"fabricloader": ">=0.17.2",
 		"minecraft": "~1.21.1",
 		"java": ">=21",
+      "cardinal-components-entity": ">=5.4.0",
 		"fabric-api": "*"
 	},
 	"suggests": {
