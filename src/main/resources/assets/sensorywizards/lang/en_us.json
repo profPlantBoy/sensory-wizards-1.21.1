@@ -6,7 +6,12 @@
   "item.sensorywizards.gold_wand": "Gold Wand",
   "item.sensorywizards.diamond_wand": "Diamond Wand",
   "item.sensorywizards.netherite_wand": "Netherite Wand",
+  "item.sensorywizards.spell_scroll": "Spell Scroll",
+  "item.sensorywizards.spell_scroll.of": "Spell Scroll of %s",
   "itemgroup.sensorywizards.sensory_wizards_tab": "Sensory Wizards",
   "key.category.sensorywizards.main": "Sensory Wizards",
-  "key.sensorywizards.open_spell_gui": "Open Spell Selector"
+  "key.sensorywizards.open_spell_gui": "Open Spell Selector",
+  "spell.sensorywizards.fireball": "Fireball",
+  "spell.sensorywizards.ice_bolt": "Ice Bolt",
+  "spell.sensorywizards.healing_touch": "Healing Touch"
 }

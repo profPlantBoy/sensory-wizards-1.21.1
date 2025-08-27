@@ -6,7 +6,11 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.profplantboy.sensorywizards.client.gui.SpellSelectionScreen;
 import net.profplantboy.sensorywizards.item.ModItems;
+import net.profplantboy.sensorywizards.spell.LearnedSpellsComponent;
+import net.profplantboy.sensorywizards.spell.ModComponents;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.ArrayList;
 
 public class KeyInputHandler {
     public static final String KEY_CATEGORY_SENSORYWIZARDS = "key.category.sensorywizards.main";
@@ -30,20 +34,19 @@ public class KeyInputHandler {
                 return;
             }
 
-            // Check if the player is holding a wand in their main hand
-            boolean holdingWand = ModItems.WANDS.containsValue(client.player.getMainHandStack().getItem());
+            if (openSpellGuiKey.wasPressed()) {
+                boolean holdingWand = ModItems.WANDS.containsValue(client.player.getMainHandStack().getItem());
 
-            // If the key is being pressed and we are holding a wand...
-            if (openSpellGuiKey.isPressed() && holdingWand) {
-                // ...and the GUI is not already open, open it.
-                if (!(client.currentScreen instanceof SpellSelectionScreen)) {
-                    client.setScreen(new SpellSelectionScreen());
+                if (holdingWand) {
+                    if (client.currentScreen instanceof SpellSelectionScreen) {
+                        client.currentScreen.close();
+                    } else {
+                        // 1. Get the component and the spells *before* creating the screen.
+                        LearnedSpellsComponent component = ModComponents.LEARNED_SPELLS.get(client.player);
+                        // 2. Pass the list of spells directly to the new screen.
+                        client.setScreen(new SpellSelectionScreen(new ArrayList<>(component.getSpells())));
+                    }
                 }
-            }
-            // Otherwise, if our GUI is open and the condition to keep it open is no longer true...
-            else if (client.currentScreen instanceof SpellSelectionScreen) {
-                // ...close it.
-                client.currentScreen.close();
             }
         });
     }

@@ -18,6 +18,19 @@ public class SpellScroll extends Item {
     }
 
     @Override
+    public Text getName(ItemStack stack) {
+        SpellComponent spellComponent = stack.get(ModComponents.SPELL_COMPONENT);
+        if (spellComponent != null && !spellComponent.spellType().isEmpty()) {
+            // This creates a name like "Spell Scroll of Fireball" by combining two translation keys
+            return Text.translatable(
+                    "item.sensorywizards.spell_scroll.of",
+                    Text.translatable("spell.sensorywizards." + spellComponent.spellType())
+            );
+        }
+        return super.getName(stack);
+    }
+
+    @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (!world.isClient) {
             ItemStack stack = user.getStackInHand(hand);
@@ -31,7 +44,7 @@ public class SpellScroll extends Item {
                     user.sendMessage(Text.of("You already know this spell!"), false);
                 } else {
                     learnedSpells.addSpell(spellId);
-                    ModComponents.LEARNED_SPELLS.sync(user); // Add this line to send an update to the client
+                    ModComponents.LEARNED_SPELLS.sync(user);
                     user.sendMessage(Text.of("You have learned the " + spellId + " spell!"), false);
                     stack.decrement(1);
                 }

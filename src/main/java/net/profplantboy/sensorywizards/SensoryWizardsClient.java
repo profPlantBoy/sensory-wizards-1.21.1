@@ -8,5 +8,6 @@ public class SensoryWizardsClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         KeyInputHandler.register();
+        // The manual packet registration and handling are no longer needed here
     }
 }

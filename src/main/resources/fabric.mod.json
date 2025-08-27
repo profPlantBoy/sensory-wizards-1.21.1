@@ -36,7 +36,8 @@
     "minecraft": "~1.21.1",
     "java": ">=21",
     "fabric-api": "*",
-    "cardinal-components-entity": ">=6.1.2"
+    "cardinal-components-entity": ">=6.1.2",
+    "cardinal-components-base": ">=6.1.2"
   },
   "suggests": {
     "another-mod": "*"

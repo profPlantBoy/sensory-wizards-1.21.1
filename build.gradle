@@ -32,6 +32,8 @@ dependencies {
 
     // Use the NEW and CORRECT Cardinal Components dependency for MC 1.21.1
     modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:6.1.2"
+    // This is the missing line that adds the library with AutoSyncedComponent
+    modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-base:6.1.2"
 }
 
 processResources {

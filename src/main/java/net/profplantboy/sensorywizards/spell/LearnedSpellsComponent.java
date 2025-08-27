@@ -4,15 +4,16 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.RegistryWrapper;
-import org.ladysnake.cca.api.v3.component.Component;
+// Import the new, correct interface
+import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class LearnedSpellsComponent implements Component {
+// Implement AutoSyncedComponent. You no longer need to also implement Component.
+public class LearnedSpellsComponent implements AutoSyncedComponent {
     private final Set<String> spells = new HashSet<>();
 
-    // Add this new method
     public Set<String> getSpells() {
         return this.spells;
     }
@@ -24,10 +25,11 @@ public class LearnedSpellsComponent implements Component {
     public void addSpell(String spellId) {
         this.spells.add(spellId);
     }
-    // Add this new method to the class
+
     public void unlearnSpell(String spellId) {
         this.spells.remove(spellId);
     }
+
     @Override
     public void readFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
         spells.clear();
