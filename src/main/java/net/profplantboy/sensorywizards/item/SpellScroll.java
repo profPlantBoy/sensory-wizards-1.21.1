@@ -31,6 +31,7 @@ public class SpellScroll extends Item {
                     user.sendMessage(Text.of("You already know this spell!"), false);
                 } else {
                     learnedSpells.addSpell(spellId);
+                    ModComponents.LEARNED_SPELLS.sync(user); // Add this line to send an update to the client
                     user.sendMessage(Text.of("You have learned the " + spellId + " spell!"), false);
                     stack.decrement(1);
                 }

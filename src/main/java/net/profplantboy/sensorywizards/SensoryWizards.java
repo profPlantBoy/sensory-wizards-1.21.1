@@ -10,6 +10,8 @@ import net.profplantboy.sensorywizards.spell.EquippedSpellComponent;
 import net.profplantboy.sensorywizards.spell.ModComponents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.profplantboy.sensorywizards.command.UnlearnSpellCommand;
 
 public class SensoryWizards implements ModInitializer {
     public static final String MOD_ID = "sensorywizards";
@@ -21,6 +23,8 @@ public class SensoryWizards implements ModInitializer {
         ModItems.registerModItems();
         registerPayloads();
         registerSpellSelectionPacket();
+
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> UnlearnSpellCommand.register(dispatcher));
     }
 
     private void registerPayloads() {

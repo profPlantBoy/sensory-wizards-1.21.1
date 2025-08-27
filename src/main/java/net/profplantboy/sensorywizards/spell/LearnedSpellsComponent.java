@@ -24,7 +24,10 @@ public class LearnedSpellsComponent implements Component {
     public void addSpell(String spellId) {
         this.spells.add(spellId);
     }
-
+    // Add this new method to the class
+    public void unlearnSpell(String spellId) {
+        this.spells.remove(spellId);
+    }
     @Override
     public void readFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
         spells.clear();
