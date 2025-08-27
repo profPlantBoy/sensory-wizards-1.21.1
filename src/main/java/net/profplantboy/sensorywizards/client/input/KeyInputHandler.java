@@ -4,7 +4,8 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.profplantboy.sensorywizards.client.gui.SpellSelectionScreen;
+// Import the new SpellWheelScreen
+import net.profplantboy.sensorywizards.client.gui.SpellWheelScreen;
 import net.profplantboy.sensorywizards.item.ModItems;
 import net.profplantboy.sensorywizards.spell.LearnedSpellsComponent;
 import net.profplantboy.sensorywizards.spell.ModComponents;
@@ -34,18 +35,19 @@ public class KeyInputHandler {
                 return;
             }
 
-            if (openSpellGuiKey.wasPressed()) {
-                boolean holdingWand = ModItems.WANDS.containsValue(client.player.getMainHandStack().getItem());
+            boolean holdingWand = ModItems.WANDS.containsValue(client.player.getMainHandStack().getItem());
 
-                if (holdingWand) {
-                    if (client.currentScreen instanceof SpellSelectionScreen) {
-                        client.currentScreen.close();
-                    } else {
-                        // 1. Get the component and the spells *before* creating the screen.
-                        LearnedSpellsComponent component = ModComponents.LEARNED_SPELLS.get(client.player);
-                        // 2. Pass the list of spells directly to the new screen.
-                        client.setScreen(new SpellSelectionScreen(new ArrayList<>(component.getSpells())));
-                    }
+            // Use isPressed() for a hold-to-open mechanic, which feels best for wheel menus
+            if (openSpellGuiKey.isPressed() && holdingWand) {
+                // Open the wheel if it's not already open
+                if (!(client.currentScreen instanceof SpellWheelScreen)) {
+                    LearnedSpellsComponent component = ModComponents.LEARNED_SPELLS.get(client.player);
+                    client.setScreen(new SpellWheelScreen(new ArrayList<>(component.getSpells())));
+                }
+            } else {
+                // Close the wheel if the key is released
+                if (client.currentScreen instanceof SpellWheelScreen) {
+                    client.currentScreen.close();
                 }
             }
         });

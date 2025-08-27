@@ -38,6 +38,7 @@ public class ModItems {
                         entries.add(createSpellStack("fireball"));
                         entries.add(createSpellStack("ice_bolt"));
                         entries.add(createSpellStack("healing_touch"));
+                        entries.add(createSpellStack("aguamenti"));
                     })
                     .build()
     );
