@@ -35,19 +35,18 @@ public class KeyInputHandler {
                 return;
             }
 
-            boolean holdingWand = ModItems.WANDS.containsValue(client.player.getMainHandStack().getItem());
+            // wasPressed() is only true for the single tick after the key is pressed
+            if (openSpellGuiKey.wasPressed()) {
+                boolean holdingWand = ModItems.WANDS.containsValue(client.player.getMainHandStack().getItem());
 
-            // Use isPressed() for a hold-to-open mechanic, which feels best for wheel menus
-            if (openSpellGuiKey.isPressed() && holdingWand) {
-                // Open the wheel if it's not already open
-                if (!(client.currentScreen instanceof SpellWheelScreen)) {
-                    LearnedSpellsComponent component = ModComponents.LEARNED_SPELLS.get(client.player);
-                    client.setScreen(new SpellWheelScreen(new ArrayList<>(component.getSpells())));
-                }
-            } else {
-                // Close the wheel if the key is released
-                if (client.currentScreen instanceof SpellWheelScreen) {
-                    client.currentScreen.close();
+                if (holdingWand) {
+                    // If the wheel is already open, close it. Otherwise, open it.
+                    if (client.currentScreen instanceof SpellWheelScreen) {
+                        client.currentScreen.close();
+                    } else {
+                        LearnedSpellsComponent component = ModComponents.LEARNED_SPELLS.get(client.player);
+                        client.setScreen(new SpellWheelScreen(new ArrayList<>(component.getSpells())));
+                    }
                 }
             }
         });
