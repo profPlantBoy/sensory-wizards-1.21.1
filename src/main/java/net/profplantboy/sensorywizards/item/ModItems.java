@@ -58,7 +58,7 @@ public class ModItems {
         String[] wandTypes = {"wooden", "stone", "copper", "iron", "gold", "diamond", "netherite"};
         for (String type : wandTypes) {
             Item wand = Registry.register(Registries.ITEM, Identifier.of(SensoryWizards.MOD_ID, type + "_wand"),
-                    new Item(new Item.Settings()));
+                    new WandItem(new Item.Settings()));
             WANDS.put(type + "_wand", wand);
         }
 

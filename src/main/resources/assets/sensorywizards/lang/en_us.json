@@ -6,5 +6,7 @@
   "item.sensorywizards.gold_wand": "Gold Wand",
   "item.sensorywizards.diamond_wand": "Diamond Wand",
   "item.sensorywizards.netherite_wand": "Netherite Wand",
-  "itemgroup.sensorywizards.sensory_wizards_tab": "Sensory Wizards"
+  "itemgroup.sensorywizards.sensory_wizards_tab": "Sensory Wizards",
+  "key.category.sensorywizards.main": "Sensory Wizards",
+  "key.sensorywizards.open_spell_gui": "Open Spell Selector"
 }

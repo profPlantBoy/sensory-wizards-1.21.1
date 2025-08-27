@@ -1,19 +1,19 @@
 {
-	"schemaVersion": 1,
-	"id": "sensorywizards",
-	"version": "${version}",
-	"name": "Sensory Wizards",
-	"description": "An mod in testing about wizardry with wands!",
-	"authors": [
-		"ProfPlantBoy"
-	],
-	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
-	},
-	"license": "MIT",
-	"icon": "assets/sensorywizards/icon.png",
-	"environment": "*",
+  "schemaVersion": 1,
+  "id": "sensorywizards",
+  "version": "${version}",
+  "name": "Sensory Wizards",
+  "description": "An mod in testing about wizardry with wands!",
+  "authors": [
+    "ProfPlantBoy"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+  "license": "MIT",
+  "icon": "assets/sensorywizards/icon.png",
+  "environment": "*",
   "entrypoints": {
     "main": [
       "net.profplantboy.sensorywizards.SensoryWizards"
@@ -28,17 +28,22 @@
       "net.profplantboy.sensorywizards.PlayerComponentInitializer"
     ]
   },
-	"mixins": [
-		"sensorywizards.mixins.json"
-	],
-	"depends": {
-		"fabricloader": ">=0.17.2",
-		"minecraft": "~1.21.1",
-		"java": ">=21",
-      "cardinal-components-entity": ">=5.4.0",
-		"fabric-api": "*"
-	},
-	"suggests": {
-		"another-mod": "*"
-	}
+  "mixins": [
+    "sensorywizards.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.17.2",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*",
+    "cardinal-components-entity": ">=6.1.2"
+  },
+  "suggests": {
+    "another-mod": "*"
+  },
+  "custom": {
+    "cardinal-components": [
+      "sensorywizards:learned_spells"
+    ]
+  }
 }
