@@ -5,5 +5,6 @@
   "item.sensorywizards.iron_wand": "Iron Wand",
   "item.sensorywizards.gold_wand": "Gold Wand",
   "item.sensorywizards.diamond_wand": "Diamond Wand",
-  "item.sensorywizards.netherite_wand": "Netherite Wand"
+  "item.sensorywizards.netherite_wand": "Netherite Wand",
+  "itemgroup.sensorywizards.sensory_wizards_tab": "Sensory Wizards"
 }

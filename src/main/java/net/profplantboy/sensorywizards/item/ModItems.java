@@ -11,52 +11,41 @@ import net.minecraft.registry.Registry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.profplantboy.sensorywizards.SensoryWizards;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class ModItems {
-                        //This is where we will start registering our items! YAY!
 
-public static final Item WOODEN_WAND = registerItem("wooden_wand", new Item(new Item.Settings()));
-// TO ADD ANOTHER ITEM YOU COPY THE LINE ABOVE BELOW THIS LINE AND CHANGE NAMES THROUGHOUT CODE!
-    // ALSO MUST DO AN ENTRIES LINE AS WELL!
-public static final Item STONE_WAND = registerItem("stone_wand", new Item(new Item.Settings()));
-public static final Item COPPER_WAND = registerItem("copper_wand", new Item(new Item.Settings()));
-public static final Item IRON_WAND = registerItem("iron_wand", new Item(new Item.Settings()));
-public static final Item GOLD_WAND = registerItem("gold_wand", new Item(new Item.Settings()));
-public static final Item DIAMOND_WAND = registerItem("diamond_wand", new Item(new Item.Settings()));
-public static final Item NETHERITE_WAND = registerItem("netherite_wand", new Item(new Item.Settings()));
+    // Use a map to store and easily access your registered items.
+    public static final Map<String, Item> WANDS = new LinkedHashMap<>();
 
-// Define and register the new custom creative tab
-public static final ItemGroup SENSORY_WIZARDS_TAB = Registry.register(
-        Registries.ITEM_GROUP,
-        Identifier.of(SensoryWizards.MOD_ID, "sensory_wizards_tab"),
-        FabricItemGroup.builder()
-                .displayName(Text.translatable("itemgroup." + SensoryWizards.MOD_ID + ".sensory_wizards_tab"))
-                .icon(() -> new ItemStack(WOODEN_WAND)) // Set the icon for the tab
-                .entries((context, entries) -> {
-                    // Add your items here
-                    entries.add(WOODEN_WAND);
-                })
-                .build()
-);
-
-
-    private static Item registerItem(String name, Item item) {
-        return Registry.register(Registries.ITEM, Identifier.of(SensoryWizards.MOD_ID, name), item);
-    }
+    // Define and register the new custom creative tab
+    public static final ItemGroup SENSORY_WIZARDS_TAB = Registry.register(
+            Registries.ITEM_GROUP,
+            Identifier.of(SensoryWizards.MOD_ID, "sensory_wizards_tab"),
+            FabricItemGroup.builder()
+                    .displayName(Text.translatable("itemgroup." + SensoryWizards.MOD_ID + ".sensory_wizards_tab"))
+                    .icon(() -> new ItemStack(WANDS.get("wooden_wand"))) // Use the map to get the icon
+                    .entries((context, entries) -> {
+                        // Add all items from the map to the creative tab
+                        WANDS.values().forEach(entries::add);
+                    })
+                    .build()
+    );
 
     public static void registerModItems() {
         SensoryWizards.LOGGER.info("Registering Mod Items for " + SensoryWizards.MOD_ID);
 
+        String[] wandTypes = {"wooden", "stone", "copper", "iron", "gold", "diamond", "netherite"};
+        for (String type : wandTypes) {
+            Item wand = Registry.register(Registries.ITEM, Identifier.of(SensoryWizards.MOD_ID, type + "_wand"),
+                    new Item(new Item.Settings()));
+            WANDS.put(type + "_wand", wand);
+        }
 
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS).register(fabricItemGroupEntries -> {
-            fabricItemGroupEntries.add(WOODEN_WAND);
-            fabricItemGroupEntries.add(STONE_WAND);
-            fabricItemGroupEntries.add(COPPER_WAND);
-            fabricItemGroupEntries.add(IRON_WAND);
-            fabricItemGroupEntries.add(GOLD_WAND);
-            fabricItemGroupEntries.add(DIAMOND_WAND);
-            fabricItemGroupEntries.add(NETHERITE_WAND);
+            // Add all items from the map to the INGREDIENTS tab
+            WANDS.values().forEach(fabricItemGroupEntries::add);
         });
-
     }
 }
