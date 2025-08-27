@@ -1,6 +1,5 @@
 package net.profplantboy.sensorywizards.spell;
 
-import net.profplantboy.sensorywizards.spell.LearnedSpellsComponent;
 import net.minecraft.component.ComponentType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
