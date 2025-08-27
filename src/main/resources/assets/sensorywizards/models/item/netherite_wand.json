@@ -1,0 +1,6 @@
+{
+  "parent": "sensorywizards:item/wand",
+  "textures": {
+    "layer0": "sensorywizards:item/netherite_wand"
+  }
+}
