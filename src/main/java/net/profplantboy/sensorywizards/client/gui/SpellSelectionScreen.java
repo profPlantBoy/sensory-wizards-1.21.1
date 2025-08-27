@@ -13,19 +13,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SpellSelectionScreen extends Screen {
-    private final List<String> learnedSpells;
+    // Make this final but initialize it in the init method
+    private final List<String> learnedSpells = new ArrayList<>();
     private String hoveredSpell = null;
 
     public SpellSelectionScreen() {
         super(Text.of("Spell Selection"));
-        LearnedSpellsComponent component = ModComponents.LEARNED_SPELLS.get(MinecraftClient.getInstance().player);
-        this.learnedSpells = new ArrayList<>(component.getSpells());
+        // We no longer get the spells here, we wait until the screen is initialized
     }
 
-    // This new method prevents the default dark background from rendering
+    @Override
+    protected void init() {
+        super.init();
+        // Get the learned spells here, when the player data is guaranteed to be available
+        LearnedSpellsComponent component = ModComponents.LEARNED_SPELLS.get(this.client.player);
+        if (component != null) {
+            this.learnedSpells.addAll(component.getSpells());
+        }
+    }
+
     @Override
     public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-        // We do nothing here to keep the background transparent
+        // Do nothing to keep the background transparent
     }
 
     @Override
@@ -35,19 +44,24 @@ public class SpellSelectionScreen extends Screen {
         int centerX = this.width / 2;
         int startY = this.height / 2 - (learnedSpells.size() * 20) / 2;
 
-        for (int i = 0; i < learnedSpells.size(); i++) {
-            String spell = learnedSpells.get(i);
-            int y = startY + i * 20;
-            int textWidth = this.textRenderer.getWidth(spell);
-            int x = centerX - textWidth / 2;
+        if (learnedSpells.isEmpty()) {
+            String message = "You have not learned any spells.";
+            int textWidth = this.textRenderer.getWidth(message);
+            context.drawText(this.textRenderer, message, centerX - textWidth / 2, this.height / 2 - 4, 0xFFFFFF, true);
+        } else {
+            for (int i = 0; i < learnedSpells.size(); i++) {
+                String spell = learnedSpells.get(i);
+                int y = startY + i * 20;
+                int textWidth = this.textRenderer.getWidth(spell);
+                int x = centerX - textWidth / 2;
 
-            boolean hovered = mouseX >= x && mouseX <= x + textWidth && mouseY >= y && mouseY <= y + 10;
-            if (hovered) {
-                this.hoveredSpell = spell;
-                // Draw a semi-transparent white highlight over the hovered spell
-                context.fill(x - 2, y - 2, x + textWidth + 2, y + 10, 0x55FFFFFF);
+                boolean hovered = mouseX >= x && mouseX <= x + textWidth && mouseY >= y && mouseY <= y + 10;
+                if (hovered) {
+                    this.hoveredSpell = spell;
+                    context.fill(x - 2, y - 2, x + textWidth + 2, y + 10, 0x55FFFFFF);
+                }
+                context.drawText(this.textRenderer, spell, x, y, 0xFFFFFF, true);
             }
-            context.drawText(this.textRenderer, spell, x, y, 0xFFFFFF, true);
         }
     }
 

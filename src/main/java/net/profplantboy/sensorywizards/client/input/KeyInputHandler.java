@@ -13,7 +13,6 @@ public class KeyInputHandler {
     public static final String KEY_OPEN_SPELL_GUI = "key.sensorywizards.open_spell_gui";
 
     public static KeyBinding openSpellGuiKey;
-    private static boolean isGuiOpen = false; // Manages the state to prevent flickering
 
     public static void register() {
         openSpellGuiKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
@@ -27,27 +26,24 @@ public class KeyInputHandler {
 
     private static void registerKeyInputs() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (client.player == null) return;
-
-            // This line is crucial: it syncs our flag if the screen is closed by other means (like ESC)
-            if (!(client.currentScreen instanceof SpellSelectionScreen)) {
-                isGuiOpen = false;
+            if (client.player == null) {
+                return;
             }
 
+            // Check if the player is holding a wand in their main hand
             boolean holdingWand = ModItems.WANDS.containsValue(client.player.getMainHandStack().getItem());
 
-            if (holdingWand && openSpellGuiKey.isPressed()) {
-                if (!isGuiOpen) {
+            // If the key is being pressed and we are holding a wand...
+            if (openSpellGuiKey.isPressed() && holdingWand) {
+                // ...and the GUI is not already open, open it.
+                if (!(client.currentScreen instanceof SpellSelectionScreen)) {
                     client.setScreen(new SpellSelectionScreen());
-                    isGuiOpen = true;
                 }
-            } else {
-                if (isGuiOpen) {
-                    if (client.currentScreen instanceof SpellSelectionScreen) {
-                        client.currentScreen.close();
-                    }
-                    // The flag will be reset on the next tick by our sync logic
-                }
+            }
+            // Otherwise, if our GUI is open and the condition to keep it open is no longer true...
+            else if (client.currentScreen instanceof SpellSelectionScreen) {
+                // ...close it.
+                client.currentScreen.close();
             }
         });
     }
