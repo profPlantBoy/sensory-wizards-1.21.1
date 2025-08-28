@@ -4,7 +4,6 @@ import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.text.Text;
@@ -17,28 +16,59 @@ import net.profplantboy.sensorywizards.spell.SpellComponent;
 
 public class ModItems {
 
-    // Use a map to store and easily access your registered items.
     public static final Map<String, Item> WANDS = new LinkedHashMap<>();
 
-    // Register the SpellScroll item.
     public static final Item SPELL_SCROLL = registerItem("spell_scroll", new SpellScroll(new Item.Settings()));
 
-    // Define and register the new custom creative tab
     public static final ItemGroup SENSORY_WIZARDS_TAB = Registry.register(
             Registries.ITEM_GROUP,
             Identifier.of(SensoryWizards.MOD_ID, "sensory_wizards_tab"),
             FabricItemGroup.builder()
                     .displayName(Text.translatable("itemgroup." + SensoryWizards.MOD_ID + ".sensory_wizards_tab"))
-                    .icon(() -> new ItemStack(WANDS.get("wooden_wand"))) // Use the map to get the icon
+                    .icon(() -> new ItemStack(WANDS.get("wooden_wand")))
                     .entries((context, entries) -> {
-                        // Add all wand items from the map to the creative tab
                         WANDS.values().forEach(entries::add);
 
-                        // Add different versions of the spell scroll
+                        // Add all spell scrolls to the creative tab
                         entries.add(createSpellStack("fireball"));
                         entries.add(createSpellStack("ice_bolt"));
                         entries.add(createSpellStack("healing_touch"));
                         entries.add(createSpellStack("aguamenti"));
+                        entries.add(createSpellStack("alarte_ascendare"));
+                        entries.add(createSpellStack("appare_vestigium"));
+                        entries.add(createSpellStack("apparition"));
+                        entries.add(createSpellStack("arania_exumai"));
+                        entries.add(createSpellStack("aresto_momentum"));
+                        entries.add(createSpellStack("ascendio"));
+                        entries.add(createSpellStack("avada_kedavra"));
+                        entries.add(createSpellStack("avifors"));
+                        entries.add(createSpellStack("avenseguim"));
+                        entries.add(createSpellStack("avis"));
+                        entries.add(createSpellStack("baubillious"));
+                        entries.add(createSpellStack("bombarda"));
+                        entries.add(createSpellStack("bombarda_maxima"));
+                        entries.add(createSpellStack("calvorio"));
+                        entries.add(createSpellStack("cave_inimicum"));
+                        entries.add(createSpellStack("celescere"));
+                        entries.add(createSpellStack("circumrota"));
+                        entries.add(createSpellStack("colloshoo"));
+                        entries.add(createSpellStack("colovaria"));
+                        entries.add(createSpellStack("confringo"));
+                        entries.add(createSpellStack("confundo"));
+                        entries.add(createSpellStack("crucio"));
+                        entries.add(createSpellStack("depulso"));
+                        entries.add(createSpellStack("evanesco"));
+                        entries.add(createSpellStack("expecto_patronum"));
+                        entries.add(createSpellStack("expelliarmus"));
+                        entries.add(createSpellStack("fracto_strata"));
+                        entries.add(createSpellStack("fumos"));
+                        entries.add(createSpellStack("glacius"));
+                        entries.add(createSpellStack("herbivicus"));
+                        entries.add(createSpellStack("homenum_revelio"));
+                        entries.add(createSpellStack("immobulus"));
+                        entries.add(createSpellStack("impedimenta"));
+                        entries.add(createSpellStack("imperio"));
+                        entries.add(createSpellStack("levicorpus"));
                     })
                     .build()
     );
