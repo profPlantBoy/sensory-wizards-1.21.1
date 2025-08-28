@@ -10,45 +10,46 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.profplantboy.sensorywizards.spell.LearnedSpellsComponent;
 import net.profplantboy.sensorywizards.spell.ModComponents;
+import net.profplantboy.sensorywizards.spell.SpellRegistry;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class UnlearnSpellCommand {
+public class LearnSpellCommand {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        dispatcher.register(literal("unlearn")
-                // Require permission level 2 (operator)
+        dispatcher.register(literal("learn")
+                // Require permission level 2 (operator) to use the command
                 .requires(source -> source.hasPermissionLevel(2))
                 .then(argument("player", EntityArgumentType.player())
-                        // Subcommand for unlearning a specific spell
+                        // Subcommand for learning a specific spell
                         .then(argument("spell", StringArgumentType.string())
-                                .suggests(learnedSpellsSuggestionProvider())
+                                .suggests(allSpellsSuggestionProvider())
                                 .executes(context -> {
                                     ServerPlayerEntity player = EntityArgumentType.getPlayer(context, "player");
                                     String spellId = StringArgumentType.getString(context, "spell");
                                     LearnedSpellsComponent learnedSpells = ModComponents.LEARNED_SPELLS.get(player);
 
-                                    if (learnedSpells.hasSpell(spellId)) {
-                                        learnedSpells.unlearnSpell(spellId);
+                                    if (SpellRegistry.getAllSpellIds().contains(spellId)) {
+                                        learnedSpells.addSpell(spellId);
                                         ModComponents.LEARNED_SPELLS.sync(player);
-                                        context.getSource().sendFeedback(() -> Text.literal("Removed " + spellId + " from " + player.getName().getString()), true);
+                                        context.getSource().sendFeedback(() -> Text.literal("Taught " + spellId + " to " + player.getName().getString()), true);
                                     } else {
-                                        context.getSource().sendError(Text.literal(player.getName().getString() + " does not know the " + spellId + " spell."));
+                                        context.getSource().sendError(Text.literal("Spell '" + spellId + "' not found."));
                                     }
                                     return 1;
                                 })
                         )
-                        // Subcommand for unlearning all spells
+                        // Subcommand for learning all spells
                         .then(literal("all")
                                 .executes(context -> {
                                     ServerPlayerEntity player = EntityArgumentType.getPlayer(context, "player");
                                     LearnedSpellsComponent learnedSpells = ModComponents.LEARNED_SPELLS.get(player);
 
-                                    learnedSpells.getSpells().clear();
+                                    SpellRegistry.getAllSpellIds().forEach(learnedSpells::addSpell);
                                     ModComponents.LEARNED_SPELLS.sync(player);
 
-                                    context.getSource().sendFeedback(() -> Text.literal("Removed all spells from " + player.getName().getString()), true);
+                                    context.getSource().sendFeedback(() -> Text.literal("Taught all spells to " + player.getName().getString()), true);
                                     return 1;
                                 })
                         )
@@ -56,17 +57,8 @@ public class UnlearnSpellCommand {
         );
     }
 
-    // Suggests only the spells that the target player has actually learned
-    private static SuggestionProvider<ServerCommandSource> learnedSpellsSuggestionProvider() {
-        return (context, builder) -> {
-            try {
-                ServerPlayerEntity player = EntityArgumentType.getPlayer(context, "player");
-                LearnedSpellsComponent learnedSpells = ModComponents.LEARNED_SPELLS.get(player);
-                return CommandSource.suggestMatching(learnedSpells.getSpells(), builder);
-            } catch (Exception e) {
-                // Return empty suggestions if the player argument is not valid yet
-                return CommandSource.suggestMatching(new String[]{}, builder);
-            }
-        };
+    // Provides suggestions for all available spells from the registry
+    private static SuggestionProvider<ServerCommandSource> allSpellsSuggestionProvider() {
+        return (context, builder) -> CommandSource.suggestMatching(SpellRegistry.getAllSpellIds(), builder);
     }
 }

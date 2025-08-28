@@ -7,6 +7,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.SpiderEntity;
 import net.minecraft.entity.passive.CowEntity;
 import net.minecraft.entity.passive.ParrotEntity;
@@ -19,6 +20,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
@@ -26,13 +28,16 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.BlockRotation;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 public class SpellRegistry {
@@ -90,12 +95,17 @@ public class SpellRegistry {
         }
     }
 
+    // New helper method to get all spell names for the commands
+    public static Set<String> getAllSpellIds() {
+        return SPELL_ACTIONS.keySet();
+    }
+
     // Utility method for raycasting to find an entity
     private static Optional<EntityHitResult> raycastForEntity(PlayerEntity player, World world, double maxDistance) {
         Vec3d start = player.getEyePos();
         Vec3d end = start.add(player.getRotationVector().multiply(maxDistance));
         Box box = new Box(start, end);
-        EntityHitResult hit = net.minecraft.entity.projectile.ProjectileUtil.getEntityCollision(world, player, start, end, box, e -> !e.isSpectator() && e.isAlive() && e.canBeHit());
+        EntityHitResult hit = net.minecraft.entity.projectile.ProjectileUtil.getEntityCollision(world, player, start, end, box, e -> !e.isSpectator() && e.isAlive() && e.isAttackable());
         return Optional.ofNullable(hit);
     }
 
@@ -157,11 +167,11 @@ public class SpellRegistry {
      * @param world The world the player is in.
      */
     private static void castApparition(PlayerEntity player, World world) {
-        if (!world.isClient) {
+        if (!world.isClient && world instanceof ServerWorld serverWorld) {
             BlockHitResult hitResult = raycastForBlock(player, world, 30);
             if (hitResult.getType() == HitResult.Type.BLOCK) {
                 BlockPos targetPos = hitResult.getBlockPos().offset(hitResult.getSide());
-                player.teleport(targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5);
+                player.teleport(serverWorld, targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5, Collections.emptySet(), player.getYaw(), player.getPitch());
                 player.playSound(SoundEvents.ENTITY_ENDERMAN_TELEPORT, 1.0F, 1.0F);
             }
         }
@@ -208,7 +218,7 @@ public class SpellRegistry {
     private static void castAscendio(PlayerEntity player, World world) {
         if (!world.isClient) {
             player.addVelocity(0, 1.2, 0);
-            player.playSound(SoundEvents.ITEM_ELYTRA_START, 1.0F, 1.0F);
+            player.playSound(SoundEvents.ITEM_ELYTRA_FLYING, 1.0F, 1.0F);
         }
     }
 
@@ -393,7 +403,7 @@ public class SpellRegistry {
                 BlockPos pos = hitResult.getBlockPos();
                 BlockState state = world.getBlockState(pos);
                 // This uses the built-in rotate function, which works for many vanilla blocks
-                world.setBlockState(pos, state.rotate(net.minecraft.block.BlockRotation.CLOCKWISE_90));
+                world.setBlockState(pos, state.rotate(BlockRotation.CLOCKWISE_90));
                 player.playSound(SoundEvents.BLOCK_GRINDSTONE_USE, 1.0F, 1.0F);
             }
         }
@@ -645,9 +655,9 @@ public class SpellRegistry {
     private static void castImmobulus(PlayerEntity player, World world) {
         if (!world.isClient) {
             raycastForEntity(player, world, 20).ifPresent(hitResult -> {
-                if (hitResult.getEntity() instanceof LivingEntity target) {
+                if (hitResult.getEntity() instanceof MobEntity target) {
                     target.setAiDisabled(true);
-                    player.playSound(SoundEvents.ENTITY_ZOMBIE_FREEZE, 1.0F, 1.0F);
+                    player.playSound(SoundEvents.ENTITY_ZOMBIE_CONVERTED_TO_DROWNED, 1.0F, 1.0F);
                     // TODO: Need a way to un-freeze them. Perhaps another spell or command.
                 }
             });
