@@ -11,7 +11,8 @@ import java.util.List;
 
 public class SpellWheelScreen extends Screen {
     private final List<String> learnedSpells;
-    private String selectedSpell = null;
+    private String hoveredSpell = null; // The spell currently under the mouse
+    private String selectedSpell = null; // The spell that will be sent to the server
     private static final int WHEEL_RADIUS = 80;
 
     public SpellWheelScreen(List<String> learnedSpells) {
@@ -30,6 +31,7 @@ public class SpellWheelScreen extends Screen {
         super.render(context, mouseX, mouseY, delta);
         int centerX = this.width / 2;
         int centerY = this.height / 2;
+        this.hoveredSpell = null; // Reset hovered spell each frame
 
         if (learnedSpells.isEmpty()) {
             String message = "You have not learned any spells.";
@@ -41,7 +43,7 @@ public class SpellWheelScreen extends Screen {
         int numSpells = learnedSpells.size();
         double angleSlice = 2 * Math.PI / numSpells;
 
-        // --- Determine which spell is selected ---
+        // --- Determine which spell is being hovered over ---
         double dx = mouseX - centerX;
         double dy = mouseY - centerY;
         double distance = Math.sqrt(dx * dx + dy * dy);
@@ -53,6 +55,9 @@ public class SpellWheelScreen extends Screen {
                 mouseAngle += 2 * Math.PI;
             }
             selectedIndex = (int) Math.round(mouseAngle / angleSlice) % numSpells;
+            if (selectedIndex >= 0 && selectedIndex < numSpells) {
+                this.hoveredSpell = learnedSpells.get(selectedIndex);
+            }
         }
 
         // --- Draw the wheel and text ---
@@ -65,7 +70,6 @@ public class SpellWheelScreen extends Screen {
             int textWidth = this.textRenderer.getWidth(spellText);
 
             if (i == selectedIndex) {
-                this.selectedSpell = learnedSpells.get(i);
                 // Draw a highlight behind the selected spell
                 context.fill(x - textWidth / 2 - 2, y - 5, x + textWidth / 2 + 2, y + 10, 0x55FFFFFF);
             }
@@ -73,13 +77,28 @@ public class SpellWheelScreen extends Screen {
             context.drawTextWithShadow(this.textRenderer, spellText, x - textWidth / 2, y, 0xFFFFFF);
         }
 
-        // Draw the name of the currently selected spell in the center
-        if (this.selectedSpell != null) {
-            Text selectedText = Text.translatable("spell.sensorywizards." + this.selectedSpell);
+        // Draw the name of the currently hovered spell in the center
+        if (this.hoveredSpell != null) {
+            Text selectedText = Text.translatable("spell.sensorywizards." + this.hoveredSpell);
             int selectedWidth = this.textRenderer.getWidth(selectedText);
             context.drawTextWithShadow(this.textRenderer, selectedText, centerX - selectedWidth / 2, centerY - 4, 0xFFFF55);
         }
     }
+
+    /**
+     * This method is called when the player clicks the mouse.
+     * It checks if a spell is being hovered over and, if so, selects it and closes the screen.
+     */
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (this.hoveredSpell != null) {
+            this.selectedSpell = this.hoveredSpell;
+            this.close(); // This is the line that closes the screen on click
+            return true;
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
 
     @Override
     public void close() {
