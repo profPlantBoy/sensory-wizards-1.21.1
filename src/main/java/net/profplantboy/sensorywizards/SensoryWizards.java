@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.item.ItemStack;
+import net.profplantboy.sensorywizards.command.LearnSpellCommand;
 import net.profplantboy.sensorywizards.command.UnlearnSpellCommand;
 import net.profplantboy.sensorywizards.item.ModItems;
 import net.profplantboy.sensorywizards.network.CastSpellPayload;
@@ -26,7 +27,11 @@ public class SensoryWizards implements ModInitializer {
         registerPayloads();
         registerPacketHandlers();
 
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> UnlearnSpellCommand.register(dispatcher));
+        // Register both of your commands here
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+            UnlearnSpellCommand.register(dispatcher);
+            LearnSpellCommand.register(dispatcher); // This was the missing line
+        });
     }
 
     private void registerPayloads() {
