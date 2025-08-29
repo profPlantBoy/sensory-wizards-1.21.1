@@ -29,10 +29,8 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-    // Use the NEW and CORRECT Cardinal Components dependency for MC 1.21.1
+    modImplementation "com.github.shedaniel:cloth-config-fabric:14.0.126"
     modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:6.1.2"
-    // This is the missing line that adds the library with AutoSyncedComponent
     modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-base:6.1.2"
 }
 
@@ -70,5 +68,14 @@ publishing {
         }
     }
     repositories {
+        maven {
+            // FIXED: Renamed from "Ladysnake Mods" to "Ladysnake" to be valid
+            name = "Ladysnake"
+            url = 'https://maven.ladysnake.org/releases'
+        }
+        // ADDED: This is the missing repository where Cloth Config is located
+        maven {
+            url = "https://jitpack.io"
+        }
     }
 }
