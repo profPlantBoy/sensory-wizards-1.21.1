@@ -26,6 +26,9 @@
     ],
     "cardinal-components": [
       "net.profplantboy.sensorywizards.PlayerComponentInitializer"
+    ],
+    "modmenu": [
+      "net.profplantboy.sensorywizards.config.SensoryWizardsModMenu"
     ]
   },
   "mixins": [

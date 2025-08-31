@@ -1,6 +1,31 @@
 {
-  "parent": "minecraft:item/generated",
+  "parent": "item/generated",
   "textures": {
     "layer0": "sensorywizards:item/spell_scroll"
-  }
+  },
+  "overrides": [
+    { "predicate": { "custom_model_data": 1 },  "model": "sensorywizards:item/spell_scroll_aguamenti" },
+    { "predicate": { "custom_model_data": 2 },  "model": "sensorywizards:item/spell_scroll_alarte_ascendare" },
+    { "predicate": { "custom_model_data": 3 },  "model": "sensorywizards:item/spell_scroll_appare_vestigium" },
+    { "predicate": { "custom_model_data": 4 },  "model": "sensorywizards:item/spell_scroll_apparition" },
+    { "predicate": { "custom_model_data": 5 },  "model": "sensorywizards:item/spell_scroll_arania_exumai" },
+    { "predicate": { "custom_model_data": 6 },  "model": "sensorywizards:item/spell_scroll_aresto_momentum" },
+    { "predicate": { "custom_model_data": 7 },  "model": "sensorywizards:item/spell_scroll_ascendio" },
+    { "predicate": { "custom_model_data": 8 },  "model": "sensorywizards:item/spell_scroll_avada_kedavra" },
+    { "predicate": { "custom_model_data": 9 },  "model": "sensorywizards:item/spell_scroll_avifors" },
+    { "predicate": { "custom_model_data": 10 }, "model": "sensorywizards:item/spell_scroll_baubillious" },
+    { "predicate": { "custom_model_data": 11 }, "model": "sensorywizards:item/spell_scroll_bombarda_maxima" },
+    { "predicate": { "custom_model_data": 12 }, "model": "sensorywizards:item/spell_scroll_bombarda" },
+    { "predicate": { "custom_model_data": 13 }, "model": "sensorywizards:item/spell_scroll_cave_inimicum" },
+    { "predicate": { "custom_model_data": 14 }, "model": "sensorywizards:item/spell_scroll_circumrota" },
+    { "predicate": { "custom_model_data": 15 }, "model": "sensorywizards:item/spell_scroll_colovaria" },
+    { "predicate": { "custom_model_data": 16 }, "model": "sensorywizards:item/spell_scroll_confringo" },
+    { "predicate": { "custom_model_data": 17 }, "model": "sensorywizards:item/spell_scroll_confundo" },
+    { "predicate": { "custom_model_data": 18 }, "model": "sensorywizards:item/spell_scroll_crucio" },
+    { "predicate": { "custom_model_data": 19 }, "model": "sensorywizards:item/spell_scroll_depulso" },
+    { "predicate": { "custom_model_data": 20 }, "model": "sensorywizards:item/spell_scroll_evanesco" },
+    { "predicate": { "custom_model_data": 21 }, "model": "sensorywizards:item/spell_scroll_fireball" },
+    { "predicate": { "custom_model_data": 22 }, "model": "sensorywizards:item/spell_scroll_healing_touch" },
+    { "predicate": { "custom_model_data": 23 }, "model": "sensorywizards:item/spell_scroll_ice_bolt" }
+  ]
 }

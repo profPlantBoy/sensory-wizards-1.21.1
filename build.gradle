@@ -10,22 +10,19 @@ base {
     archivesName = project.archives_base_name
 }
 
-// Add the correct repository for the NEW Cardinal Components
 repositories {
-    maven {
-        name = "Ladysnake Mods"
-        url = 'https://maven.ladysnake.org/releases'
-    }
-    maven {
-        name = "Shedaniel Maven"
-        url = "https://maven.shedaniel.me/"
-    }
-    maven {
-        name = "TerraformersMC"
-        url = "https://maven.terraformersmc.com/releases/"
-    }
-    mavenCentral()
+    // Required for Fabric & Yarn
     maven { url = "https://maven.fabricmc.net/" }
+    mavenCentral()
+
+    // Cloth Config (Shedaniel)
+    maven { url = "https://maven.shedaniel.me/" }
+
+    // Mod Menu
+    maven { url = "https://maven.terraformersmc.com/releases/" }
+
+    // Cardinal Components (Ladysnake)
+    maven { url = "https://maven.ladysnake.org/releases" }
 }
 
 fabricApi {
@@ -35,13 +32,24 @@ fabricApi {
 }
 
 dependencies {
+    // Core Minecraft/Fabric
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    // Cloth Config for config UI + AutoConfig
+    // (v15.x is for 1.21/1.21.1)
     modImplementation "me.shedaniel.cloth:cloth-config-fabric:15.0.130"
-    modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:6.1.2"
+
+    // Mod Menu (for the in-game Config button)
+    // Use 'compileOnly' so Mod Menu is optional at runtime
+    modCompileOnly "com.terraformersmc:modmenu:11.0.1"
+    modRuntimeOnly  "com.terraformersmc:modmenu:11.0.1"
+
+    // Cardinal Components (as in your project)
     modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-base:6.1.2"
+    modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:6.1.2"
 }
 
 processResources {
@@ -64,10 +72,7 @@ java {
 
 jar {
     inputs.property "archivesName", project.base.archivesName
-
-    from("LICENSE") {
-        rename { "${it}_${inputs.properties.archivesName}"}
-    }
+    from("LICENSE") { rename { "${it}_${inputs.properties.archivesName}" } }
 }
 
 publishing {
@@ -77,15 +82,11 @@ publishing {
             from components.java
         }
     }
+    // keep this if you actually publish; harmless otherwise
     repositories {
         maven {
-            // FIXED: Renamed from "Ladysnake Mods" to "Ladysnake" to be valid
             name = "Ladysnake"
             url = 'https://maven.ladysnake.org/releases'
-        }
-        // ADDED: This is the missing repository where Cloth Config is located
-        maven {
-            url = "https://jitpack.io"
         }
     }
 }
