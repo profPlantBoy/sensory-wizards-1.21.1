@@ -4,14 +4,9 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-// Import the new SpellWheelScreen
 import net.profplantboy.sensorywizards.client.gui.SpellWheelScreen;
 import net.profplantboy.sensorywizards.item.ModItems;
-import net.profplantboy.sensorywizards.spell.LearnedSpellsComponent;
-import net.profplantboy.sensorywizards.spell.ModComponents;
 import org.lwjgl.glfw.GLFW;
-
-import java.util.ArrayList;
 
 public class KeyInputHandler {
     public static final String KEY_CATEGORY_SENSORYWIZARDS = "key.category.sensorywizards.main";
@@ -31,21 +26,18 @@ public class KeyInputHandler {
 
     private static void registerKeyInputs() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (client.player == null) {
-                return;
-            }
+            if (client.player == null) return;
 
-            // wasPressed() is only true for the single tick after the key is pressed
             if (openSpellGuiKey.wasPressed()) {
                 boolean holdingWand = ModItems.WANDS.containsValue(client.player.getMainHandStack().getItem());
 
                 if (holdingWand) {
-                    // If the wheel is already open, close it. Otherwise, open it.
                     if (client.currentScreen instanceof SpellWheelScreen) {
+                        // close if already open
                         client.currentScreen.close();
                     } else {
-                        LearnedSpellsComponent component = ModComponents.LEARNED_SPELLS.get(client.player);
-                        client.setScreen(new SpellWheelScreen(new ArrayList<>(component.getSpells())));
+                        // open new wheel (no args)
+                        client.setScreen(new SpellWheelScreen());
                     }
                 }
             }

@@ -1,116 +1,239 @@
 package net.profplantboy.sensorywizards.client.gui;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import me.shedaniel.autoconfig.AutoConfig;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.item.ItemStack;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
+import net.profplantboy.sensorywizards.config.SensoryWizardsConfig;
+import net.profplantboy.sensorywizards.item.ModItems;
 import net.profplantboy.sensorywizards.network.SelectSpellPayload;
+import net.profplantboy.sensorywizards.spell.LearnedSpellsComponent;
+import net.profplantboy.sensorywizards.spell.ModComponents;
+import net.profplantboy.sensorywizards.spell.SpellCategories;
+import net.profplantboy.sensorywizards.spell.SpellIds;
 
-import java.util.List;
+import java.util.*;
 
 public class SpellWheelScreen extends Screen {
-    private final List<String> learnedSpells;
-    private String hoveredSpell = null; // The spell currently under the mouse
-    private String selectedSpell = null; // The spell that will be sent to the server
-    private static final int WHEEL_RADIUS = 80;
+    private enum Mode { CATEGORY, SPELLS }
+    private Mode mode = Mode.CATEGORY;
+    private String currentCategory = null;
 
-    public SpellWheelScreen(List<String> learnedSpells) {
-        super(Text.of("Spell Wheel"));
-        this.learnedSpells = learnedSpells;
+    // Layout
+    private static final int PADDING = 10;
+    private static final int ICON_SIZE = 20; // 16px item + padding inside cell
+    private static final int GAP = 8;        // gap between cells
+    private static final int COLS = 6;       // target columns (clamped by width)
+
+    private final List<Entry> entries = new ArrayList<>();
+
+    private static final class Entry {
+        int x, y, w, h;
+        Text label;
+        Runnable onClick;
+        ItemStack icon;
+    }
+
+    public SpellWheelScreen() {
+        super(Text.translatable("screen.sensorywizards.spell_wheel"));
     }
 
     @Override
-    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-        // Render a semi-transparent dark background
-        context.fill(0, 0, this.width, this.height, 0x80000000);
+    protected void init() {
+        super.init();
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-        int centerX = this.width / 2;
-        int centerY = this.height / 2;
-        this.hoveredSpell = null; // Reset hovered spell each frame
+    public boolean shouldCloseOnEsc() { return true; }
 
-        if (learnedSpells.isEmpty()) {
-            String message = "You have not learned any spells.";
-            int textWidth = this.textRenderer.getWidth(message);
-            context.drawTextWithShadow(this.textRenderer, message, centerX - textWidth / 2, centerY - 4, 0xFFFFFF);
-            return;
-        }
-
-        int numSpells = learnedSpells.size();
-        double angleSlice = 2 * Math.PI / numSpells;
-
-        // --- Determine which spell is being hovered over ---
-        double dx = mouseX - centerX;
-        double dy = mouseY - centerY;
-        double distance = Math.sqrt(dx * dx + dy * dy);
-
-        int selectedIndex = -1;
-        if (distance > 20) { // Inner dead zone to prevent accidental selection
-            double mouseAngle = Math.atan2(dy, dx);
-            if (mouseAngle < 0) {
-                mouseAngle += 2 * Math.PI;
-            }
-            selectedIndex = (int) Math.round(mouseAngle / angleSlice) % numSpells;
-            if (selectedIndex >= 0 && selectedIndex < numSpells) {
-                this.hoveredSpell = learnedSpells.get(selectedIndex);
-            }
-        }
-
-        // --- Draw the wheel and text ---
-        for (int i = 0; i < numSpells; i++) {
-            double angle = i * angleSlice;
-            int x = centerX + (int) (WHEEL_RADIUS * Math.cos(angle));
-            int y = centerY + (int) (WHEEL_RADIUS * Math.sin(angle));
-
-            Text spellText = Text.translatable("spell.sensorywizards." + learnedSpells.get(i));
-            int textWidth = this.textRenderer.getWidth(spellText);
-
-            if (i == selectedIndex) {
-                // Draw a highlight behind the selected spell
-                context.fill(x - textWidth / 2 - 2, y - 5, x + textWidth / 2 + 2, y + 10, 0x55FFFFFF);
-            }
-
-            context.drawTextWithShadow(this.textRenderer, spellText, x - textWidth / 2, y, 0xFFFFFF);
-        }
-
-        // Draw the name of the currently hovered spell in the center
-        if (this.hoveredSpell != null) {
-            Text selectedText = Text.translatable("spell.sensorywizards." + this.hoveredSpell);
-            int selectedWidth = this.textRenderer.getWidth(selectedText);
-            context.drawTextWithShadow(this.textRenderer, selectedText, centerX - selectedWidth / 2, centerY - 4, 0xFFFF55);
-        }
+    @Override
+    public void close() {
+        if (this.client != null) this.client.setScreen(null);
     }
 
-    /**
-     * This method is called when the player clicks the mouse.
-     * It checks if a spell is being hovered over and, if so, selects it and closes the screen.
-     */
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (this.hoveredSpell != null) {
-            this.selectedSpell = this.hoveredSpell;
-            this.close(); // This is the line that closes the screen on click
-            return true;
+        for (Entry e : entries) {
+            if (mouseX >= e.x && mouseX <= e.x + e.w && mouseY >= e.y && mouseY <= e.y + e.h) {
+                if (e.onClick != null) {
+                    e.onClick.run();
+                    return true;
+                }
+            }
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-
     @Override
-    public void close() {
-        // Send the selected spell when the screen closes
-        if (this.selectedSpell != null) {
-            ClientPlayNetworking.send(new SelectSpellPayload(this.selectedSpell));
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (button == 1 && mode == Mode.SPELLS) { // right click = back
+            mode = Mode.CATEGORY;
+            currentCategory = null;
+            playClick();
+            return true;
         }
-        super.close();
+        return super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
-    public boolean shouldPause() {
-        return false;
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (this.client != null && this.client.options != null &&
+                this.client.options.inventoryKey.matchesKey(keyCode, scanCode)) {
+            close();
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
+        // Vanilla background/blur
+        this.renderBackground(ctx, mouseX, mouseY, delta);
+
+
+        // Ensure no stray tints
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+
+        entries.clear();
+
+        // Title
+        final Text titleText = (mode == Mode.CATEGORY)
+                ? Text.literal("Choose a Category")
+                : Text.literal("Category: " + currentCategory);
+        ctx.drawCenteredTextWithShadow(this.textRenderer, titleText, width / 2, PADDING, 0xFFFFFF);
+
+        // Build icons/labels/actions
+        final List<ItemStack> icons = new ArrayList<>();
+        final List<Text> labels = new ArrayList<>();
+        final List<Runnable> actions = new ArrayList<>();
+
+        final SensoryWizardsConfig cfg = AutoConfig.getConfigHolder(SensoryWizardsConfig.class).getConfig();
+        cfg.ensureDefaults(SpellIds.ALL);
+
+        final Set<String> learned = new HashSet<>();
+        if (this.client != null && this.client.player != null) {
+            LearnedSpellsComponent comp = ModComponents.LEARNED_SPELLS.get(this.client.player);
+            learned.addAll(comp.getSpells());
+        }
+
+        if (mode == Mode.CATEGORY) {
+            for (Map.Entry<String, List<String>> cat : SpellCategories.MAP.entrySet()) {
+                final String catName = cat.getKey();
+                ItemStack icon = null;
+                boolean hasAny = false;
+                for (String id : cat.getValue()) {
+                    if (cfg.isEnabled(id) && learned.contains(id)) {
+                        icon = ModItems.makeSpellScrollStack(id);
+                        hasAny = true;
+                        break;
+                    }
+                }
+                if (!hasAny) continue;            // hide empty categories
+                if (icon == null) icon = new ItemStack(ModItems.SPELL_SCROLL);
+
+                icons.add(icon);
+                labels.add(Text.literal(catName));
+                actions.add(() -> {
+                    currentCategory = catName;
+                    mode = Mode.SPELLS;
+                    playClick();
+                });
+            }
+        } else {
+            final List<String> ids = SpellCategories.MAP.getOrDefault(currentCategory, List.of());
+            for (String id : ids) {
+                if (!cfg.isEnabled(id)) continue;
+                if (!learned.contains(id)) continue;
+                final ItemStack icon = ModItems.makeSpellScrollStack(id);
+                icons.add(icon);
+                labels.add(Text.literal(id));
+                actions.add(() -> {
+                    final MinecraftClient mc = this.client;
+                    if (mc != null && mc.player != null) {
+                        ClientPlayNetworking.send(new SelectSpellPayload(id));
+                        playClick();
+                    }
+                    close();
+                });
+            }
+        }
+
+        // Grid layout
+        final int cell = ICON_SIZE + GAP;
+        final int usableWidth = Math.max(0, width - PADDING * 2);
+        final int maxPerRow = Math.max(1, Math.min(COLS, Math.max(1, usableWidth / cell)));
+        final int rows = (int) Math.ceil(icons.size() / (double) maxPerRow);
+        final int gridW = Math.min(icons.size(), maxPerRow) * cell;
+        final int gridH = rows * cell;
+
+        final int startX = (width - gridW) / 2;
+        final int startY = Math.max(PADDING + 16, (height - gridH) / 2);
+
+        // Draw a soft panel behind the grid (no covering blur)
+        if (!icons.isEmpty()) {
+            final int panelPad = 6;
+            final int panelX0 = startX - panelPad;
+            final int panelY0 = startY - panelPad;
+            final int panelX1 = startX + gridW - GAP + ICON_SIZE + panelPad;
+            final int panelY1 = startY + gridH - GAP + ICON_SIZE + panelPad;
+            ctx.fill(panelX0, panelY0, panelX1, panelY1, 0x66000000); // translucent dark
+            ctx.drawBorder(panelX0, panelY0, panelX1 - panelX0, panelY1 - panelY0, 0x55FFFFFF);
+        }
+
+        // Build/draw entries; track hovered for top label
+        Entry hovered = null;
+
+        for (int i = 0; i < icons.size(); i++) {
+            final int row = i / maxPerRow;
+            final int col = i % maxPerRow;
+            final int x = startX + col * cell;
+            final int y = startY + row * cell;
+
+            final Entry e = new Entry();
+            e.x = x; e.y = y; e.w = ICON_SIZE; e.h = ICON_SIZE;
+            e.icon = icons.get(i);
+            e.label = labels.get(i);
+            e.onClick = actions.get(i);
+            entries.add(e);
+
+            final boolean hover = mouseX >= e.x && mouseX <= e.x + e.w &&
+                    mouseY >= e.y && mouseY <= e.y + e.h;
+            if (hover) hovered = e;
+
+            // subtle hover border instead of white overlay
+            ctx.drawItem(e.icon, e.x + 2, e.y + 2);
+            ctx.drawBorder(e.x - 1, e.y - 1, e.w + 2, e.h + 2, hover ? 0xFFFFFFFF : 0x55FFFFFF);
+        }
+
+        // Single hover label under the title
+        if (hovered != null) {
+            ctx.drawCenteredTextWithShadow(
+                    this.textRenderer,
+                    hovered.label,
+                    width / 2,
+                    PADDING + 14,
+                    0xFFEEDD
+            );
+        }
+
+        // Back hint
+        if (mode == Mode.SPELLS) {
+            ctx.drawCenteredTextWithShadow(this.textRenderer, Text.literal("[Right-click] Back"),
+                    width / 2, height - PADDING - 12, 0xAAAAAA);
+        }
+
+        super.render(ctx, mouseX, mouseY, delta);
+    }
+
+    private void playClick() {
+        if (this.client != null) {
+            this.client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        }
     }
 }
