@@ -9,6 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.profplantboy.sensorywizards.block.ModBlocks;
 import net.profplantboy.sensorywizards.command.LearnSpellCommand;
 import net.profplantboy.sensorywizards.command.UnlearnSpellCommand;
+import net.profplantboy.sensorywizards.item.ModItemGroups;
 import net.profplantboy.sensorywizards.item.ModItems;
 import net.profplantboy.sensorywizards.network.CastSpellPayload;
 import net.profplantboy.sensorywizards.network.SelectSpellPayload;
@@ -33,12 +34,11 @@ public class SensoryWizards implements ModInitializer {
         // Your existing init
         ModComponents.registerComponents();
         ModItems.registerModItems();
-        ModBlocks.registerModBlocks();
         ModBlocks.register();
         WandCarverScreenHandler.register();
         registerPayloads();
         registerPacketHandlers();
-
+        ModItemGroups.register();
         // ---- Config setup (AutoConfig + defaults) ----
         AutoConfig.register(SensoryWizardsConfig.class, GsonConfigSerializer::new);
         SensoryWizardsConfig config = AutoConfig.getConfigHolder(SensoryWizardsConfig.class).getConfig();

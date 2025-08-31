@@ -51,6 +51,7 @@
   "spell.sensorywizards.imperio": "Imperio",
   "spell.sensorywizards.levicorpus": "Levicorpus",
   "block.sensorywizards.wand_carver": "Wand Carver",
-  "screen.sensorywizards.wand_carver": "Wand Carver"
+  "screen.sensorywizards.wand_carver": "Wand Carver",
+  "itemGroup.sensorywizards": "Sensory Wizards"
 }
 

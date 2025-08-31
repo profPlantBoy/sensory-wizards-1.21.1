@@ -5,7 +5,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
@@ -24,16 +23,22 @@ public class WandCarverScreenHandler extends ScreenHandler {
     public static ScreenHandlerType<WandCarverScreenHandler> TYPE;
 
     public static void register() {
+        // 1.21+: ExtendedScreenHandlerType needs a data codec (we send BlockPos)
         TYPE = Registry.register(
                 Registries.SCREEN_HANDLER,
                 Identifier.of(SensoryWizards.MOD_ID, "wand_carver"),
-                new ExtendedScreenHandlerType<>((syncId, playerInv, buf) -> {
-                    BlockPos pos = buf.readBlockPos();
-                    var be = (WandCarverBlockEntity) playerInv.player.getWorld().getBlockEntity(pos);
-                    // On client, 'be' exists because the chunk is synced when the screen opens.
-                    return new WandCarverScreenHandler(syncId, playerInv, be, be.getProperties(), pos);
-                })
+                new ExtendedScreenHandlerType<>(
+                        WandCarverScreenHandler::createClient, // client factory gets decoded BlockPos directly
+                        BlockPos.PACKET_CODEC
+                )
         );
+    }
+
+    /** Client-side factory used by the ExtendedScreenHandlerType. */
+    private static WandCarverScreenHandler createClient(int syncId, PlayerInventory playerInv, BlockPos pos) {
+        var be = (WandCarverBlockEntity) playerInv.player.getWorld().getBlockEntity(pos);
+        // On client, BE should be present since chunk is synced for UI open.
+        return new WandCarverScreenHandler(syncId, playerInv, be, be.getProperties(), pos);
     }
 
     private final Inventory inventory;          // server: BE inventory, client: same BE instance

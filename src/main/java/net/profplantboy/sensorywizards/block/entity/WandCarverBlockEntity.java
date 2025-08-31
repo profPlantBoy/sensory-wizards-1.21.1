@@ -3,31 +3,31 @@ package net.profplantboy.sensorywizards.block.entity;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SidedInventory;
-import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.screen.NamedScreenHandlerFactory;
+import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.screen.ArrayPropertyDelegate;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ArrayPropertyDelegate;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 
-import net.profplantboy.sensorywizards.SensoryWizards;
 import net.profplantboy.sensorywizards.block.ModBlocks;
 import net.profplantboy.sensorywizards.item.ModItems;
 import net.profplantboy.sensorywizards.screen.WandCarverScreenHandler;
 
-public class WandCarverBlockEntity extends BlockEntity implements ExtendedScreenHandlerFactory, Inventory {
+public class WandCarverBlockEntity extends BlockEntity
+        implements ExtendedScreenHandlerFactory<BlockPos>, net.minecraft.inventory.Inventory {
+
     /**
      * Slots:
      * 0 = wood input
@@ -37,49 +37,69 @@ public class WandCarverBlockEntity extends BlockEntity implements ExtendedScreen
      */
     private final DefaultedList<ItemStack> items = DefaultedList.ofSize(4, ItemStack.EMPTY);
 
-    // For simple sync/progress bars (we only keep a dummy progress here)
+    // simple sync/progress (dummy for now)
     private final PropertyDelegate properties = new ArrayPropertyDelegate(1);
 
     public WandCarverBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlocks.WAND_CARVER_ENTITY, pos, state);
     }
 
-    /* ---------- Inventory implementation (server authority) ---------- */
-    @Override public int size() { return items.size(); }
-    @Override public boolean isEmpty() {
+    /* ---------- Inventory implementation ---------- */
+    @Override
+    public int size() { return items.size(); }
+
+    @Override
+    public boolean isEmpty() {
         for (ItemStack s : items) if (!s.isEmpty()) return false;
         return true;
     }
-    @Override public ItemStack getStack(int slot) { return items.get(slot); }
-    @Override public ItemStack removeStack(int slot, int amount) {
+
+    @Override
+    public ItemStack getStack(int slot) {
+        return items.get(slot);
+    }
+
+    @Override
+    public ItemStack removeStack(int slot, int amount) {
         ItemStack stack = items.get(slot);
         if (stack.isEmpty()) return ItemStack.EMPTY;
         ItemStack split = stack.split(amount);
         markDirty();
         return split;
     }
-    @Override public ItemStack removeStack(int slot) {
+
+    @Override
+    public ItemStack removeStack(int slot) {
         ItemStack s = items.get(slot);
         items.set(slot, ItemStack.EMPTY);
         markDirty();
         return s;
     }
-    @Override public void setStack(int slot, ItemStack stack) {
+
+    @Override
+    public void setStack(int slot, ItemStack stack) {
         items.set(slot, stack);
         if (stack.getCount() > stack.getMaxCount()) stack.setCount(stack.getMaxCount());
         markDirty();
     }
-    @Override public boolean canPlayerUse(PlayerEntity player) {
-        return player.squaredDistanceTo(pos.getX()+0.5, pos.getY()+0.5, pos.getZ()+0.5) <= 64.0;
+
+    @Override
+    public boolean canPlayerUse(PlayerEntity player) {
+        return player.squaredDistanceTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) <= 64.0;
     }
-    @Override public void clear() { items.clear(); markDirty(); }
+
+    @Override
+    public void clear() {
+        items.clear();
+        markDirty();
+    }
 
     public PropertyDelegate getProperties() { return properties; }
 
-    /* ---------- Screen opening (send BlockPos to client) ---------- */
+    /* ---------- Extended screen opening data (1.21+) ---------- */
     @Override
-    public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
-        buf.writeBlockPos(this.pos);
+    public BlockPos getScreenOpeningData(ServerPlayerEntity player) {
+        return this.pos; // send BlockPos to the client
     }
 
     @Override
@@ -89,33 +109,32 @@ public class WandCarverBlockEntity extends BlockEntity implements ExtendedScreen
 
     @Override
     public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
+        // Server-side constructor; client side should read the BlockPos from the extended open data
         return new WandCarverScreenHandler(syncId, playerInventory, this, this.properties, this.pos);
     }
 
     /* ---------- Very simple "craft" logic for now ---------- */
     public void tryCraft() {
-        // Inputs
         ItemStack wood = items.get(0);
         ItemStack core = items.get(1);
         ItemStack focus = items.get(2);
         ItemStack output = items.get(3);
 
-        // Basic rule for the skeleton:
-        //  - Accept STICK (wood) + FEATHER (core), focus optional (AMETHYST_SHARD)
-        //  - Produce your wooden wand item
         boolean hasWood = !wood.isEmpty() && wood.isOf(Items.STICK);
         boolean hasCore = !core.isEmpty() && core.isOf(Items.FEATHER);
         boolean hasSpace = output.isEmpty();
 
         if (hasWood && hasCore && hasSpace) {
             ItemStack result = new ItemStack(ModItems.WANDS.get("wooden_wand"));
-            // store some demonstration data in NBT (you'll replace later)
-            NbtCompound nbt = result.getOrCreateNbt();
-            nbt.putString("wand_wood", "holly");
-            nbt.putString("wand_core", "phoenix_feather");
+
+            // 1.21+ custom per-stack data via Data Components
+            NbtCompound custom = new NbtCompound();
+            custom.putString("wand_wood", "holly");
+            custom.putString("wand_core", "phoenix_feather");
             if (!focus.isEmpty() && focus.isOf(Items.AMETHYST_SHARD)) {
-                nbt.putString("wand_focus", "amethyst");
+                custom.putString("wand_focus", "amethyst");
             }
+            result.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(custom));
 
             items.set(3, result);
             wood.decrement(1);
@@ -130,31 +149,27 @@ public class WandCarverBlockEntity extends BlockEntity implements ExtendedScreen
     public void dropContents(net.minecraft.world.World world, BlockPos pos) {
         for (ItemStack stack : items) {
             if (!stack.isEmpty()) {
-                ItemEntity e = new ItemEntity(world, pos.getX()+0.5, pos.getY()+0.5, pos.getZ()+0.5, stack.copy());
+                ItemEntity e = new ItemEntity(world,
+                        pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                        stack.copy());
                 world.spawnEntity(e);
             }
         }
         clear();
     }
 
-    /* ---------- Save/Load ---------- */
+    /* ---------- Save/Load (1.21 signatures) ---------- */
     @Override
-    protected void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
-        SimpleInventory inv = new SimpleInventory(items.size());
-        for (int i = 0; i < items.size(); i++) inv.setStack(i, items.get(i));
-        nbt.put("inv", inv.toNbtList());
+    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
+        super.writeNbt(nbt, lookup);
+        // Writes inventory under default "Items" list tag
+        Inventories.writeNbt(nbt, this.items, lookup);
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
-        items.clear();
-        DefaultedList<ItemStack> loaded = DefaultedList.ofSize(items.size(), ItemStack.EMPTY);
-        SimpleInventory inv = new SimpleInventory(items.size());
-        inv.readNbtList(nbt.getList("inv", 10));
-        for (int i = 0; i < loaded.size(); i++) {
-            items.set(i, inv.getStack(i));
-        }
+    public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
+        super.readNbt(nbt, lookup);
+        this.items.clear();
+        Inventories.readNbt(nbt, this.items, lookup);
     }
 }

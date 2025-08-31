@@ -22,7 +22,7 @@
       "net.profplantboy.sensorywizards.SensoryWizardsDataGenerator"
     ],
     "client": [
-      "net.profplantboy.sensorywizards.SensoryWizardsClient"
+      "net.profplantboy.sensorywizards.client.SensoryWizardsClient"
     ],
     "cardinal-components": [
       "net.profplantboy.sensorywizards.PlayerComponentInitializer"

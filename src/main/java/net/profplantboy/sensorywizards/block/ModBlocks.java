@@ -1,10 +1,11 @@
 package net.profplantboy.sensorywizards.block;
 
+import com.mojang.serialization.MapCodec;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -17,9 +18,8 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.world.World;
-import net.minecraft.world.BlockView;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 
@@ -29,7 +29,7 @@ import net.profplantboy.sensorywizards.block.entity.WandCarverBlockEntity;
 public final class ModBlocks {
     private ModBlocks() {}
 
-    public static final Block WAND_CARVER = Registry.register(
+    public static final WandCarverBlock WAND_CARVER = Registry.register(
             Registries.BLOCK,
             Identifier.of(SensoryWizards.MOD_ID, "wand_carver"),
             new WandCarverBlock(AbstractBlock.Settings.create()
@@ -57,7 +57,15 @@ public final class ModBlocks {
 
     /** The block class (opens a screen, provides the BE). */
     public static class WandCarverBlock extends BlockWithEntity {
+        public static final MapCodec<WandCarverBlock> CODEC = createCodec(WandCarverBlock::new);
+
         public WandCarverBlock(Settings settings) { super(settings); }
+
+        // 1) Required by BlockWithEntity in 1.21+: provide a codec for state <-> json/nbt
+        @Override
+        protected MapCodec<? extends BlockWithEntity> getCodec() {
+            return CODEC;
+        }
 
         @Override
         public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
@@ -71,16 +79,16 @@ public final class ModBlocks {
         }
 
         @Override
-        public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        public ActionResult onUse(BlockState state, World world, BlockPos pos,
+                                  PlayerEntity player, BlockHitResult hit) {
             if (!world.isClient) {
                 BlockEntity be = world.getBlockEntity(pos);
                 if (be instanceof WandCarverBlockEntity carver) {
-                    player.openHandledScreen(carver); // opens our container/screen
+                    player.openHandledScreen(carver);
                 }
             }
             return ActionResult.SUCCESS;
         }
-
         @Override
         protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
             if (state.getBlock() != newState.getBlock()) {
@@ -92,13 +100,8 @@ public final class ModBlocks {
             }
         }
 
-        @Override
-        public boolean hasRandomTicks(BlockState state) { return false; }
-
-        @Override
-        public BlockEntity createBlockEntity(BlockPos pos, BlockState state, BlockView world) {
-            // (not used in 1.21 default pipeline, but some mappings call this)
-            return createBlockEntity(pos, state);
-        }
+        // NOTE:
+        // - Remove hasRandomTicks(...) — there is no overridable method with that signature here.
+        // - Remove createBlockEntity(BlockPos, BlockState, BlockView) — not a valid override in 1.21.
     }
 }
