@@ -1,45 +1,104 @@
 package net.profplantboy.sensorywizards.block;
 
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockRenderType;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
+import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroups;
-import net.minecraft.registry.Registry;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.world.World;
+import net.minecraft.world.BlockView;
+import net.minecraft.util.math.BlockPos;
+
+import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+
 import net.profplantboy.sensorywizards.SensoryWizards;
+import net.profplantboy.sensorywizards.block.entity.WandCarverBlockEntity;
 
-public class ModBlocks {
+public final class ModBlocks {
+    private ModBlocks() {}
 
-    public static final Block TEST_BLOCK = registerBlock("test_block",
-            new Block(AbstractBlock.Settings.create().strength(4f)
-                    .requiresTool().sounds(BlockSoundGroup.BAMBOO_WOOD)));
-// ABOVE IS A METHOD FOR CREATING A NEW BLOCK! THERE ARE TONS OF THINGS YOU CAN CALL ON LIKE HOW
-    //WE CALLED .requiresTool() OR .sounds() YOU CAN MESS WITH THIS!
+    public static final Block WAND_CARVER = Registry.register(
+            Registries.BLOCK,
+            Identifier.of(SensoryWizards.MOD_ID, "wand_carver"),
+            new WandCarverBlock(AbstractBlock.Settings.create()
+                    .strength(2.5F)
+                    .sounds(BlockSoundGroup.WOOD))
+    );
 
-    // Helper Method
-    // If you read my notes in my code I am learning to code so I mark things quite a bit
-    private static Block registerBlock(String name, Block block) {
-        registerBlockItem(name, block);
-        return Registry.register(Registries.BLOCK, Identifier.of(SensoryWizards.MOD_ID, name), block);
+    public static final Item WAND_CARVER_ITEM = Registry.register(
+            Registries.ITEM,
+            Identifier.of(SensoryWizards.MOD_ID, "wand_carver"),
+            new BlockItem(WAND_CARVER, new Item.Settings())
+    );
+
+    public static final BlockEntityType<WandCarverBlockEntity> WAND_CARVER_ENTITY =
+            Registry.register(
+                    Registries.BLOCK_ENTITY_TYPE,
+                    Identifier.of(SensoryWizards.MOD_ID, "wand_carver"),
+                    FabricBlockEntityTypeBuilder.create(WandCarverBlockEntity::new, WAND_CARVER).build()
+            );
+
+    /** Call from your main mod initializer. */
+    public static void register() {
+        SensoryWizards.LOGGER.info("[sensorywizards] Registered Wand Carver block & BE.");
     }
 
-    // Helper Method
-    private static void registerBlockItem(String name, Block block) {
-        Registry.register(Registries.ITEM, Identifier.of(SensoryWizards.MOD_ID),
-             new BlockItem(block, new Item.Settings()));
-    }
-    // Shows what is happening inside of log
-    public static void registerModBlocks() {
-        SensoryWizards.LOGGER.info("Registering Mod Blocks for " + SensoryWizards.MOD_ID);
-// BELOW Adds the TEST_BLOCK to the BUILDING_BLOCKS creative tab!
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.BUILDING_BLOCKS).register(entries ->
-                entries.add(ModBlocks.TEST_BLOCK)
-        );
+    /** The block class (opens a screen, provides the BE). */
+    public static class WandCarverBlock extends BlockWithEntity {
+        public WandCarverBlock(Settings settings) { super(settings); }
 
-    }
+        @Override
+        public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+            return new WandCarverBlockEntity(pos, state);
+        }
 
+        @Override
+        public BlockRenderType getRenderType(BlockState state) {
+            // normal block model
+            return BlockRenderType.MODEL;
+        }
+
+        @Override
+        public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+            if (!world.isClient) {
+                BlockEntity be = world.getBlockEntity(pos);
+                if (be instanceof WandCarverBlockEntity carver) {
+                    player.openHandledScreen(carver); // opens our container/screen
+                }
+            }
+            return ActionResult.SUCCESS;
+        }
+
+        @Override
+        protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+            if (state.getBlock() != newState.getBlock()) {
+                BlockEntity be = world.getBlockEntity(pos);
+                if (be instanceof WandCarverBlockEntity carver) {
+                    carver.dropContents(world, pos);
+                }
+                super.onStateReplaced(state, world, pos, newState, moved);
+            }
+        }
+
+        @Override
+        public boolean hasRandomTicks(BlockState state) { return false; }
+
+        @Override
+        public BlockEntity createBlockEntity(BlockPos pos, BlockState state, BlockView world) {
+            // (not used in 1.21 default pipeline, but some mappings call this)
+            return createBlockEntity(pos, state);
+        }
+    }
 }

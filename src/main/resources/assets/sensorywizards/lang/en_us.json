@@ -49,6 +49,8 @@
   "spell.sensorywizards.immobulus": "Immobulus",
   "spell.sensorywizards.impedimenta": "Impedimenta",
   "spell.sensorywizards.imperio": "Imperio",
-  "spell.sensorywizards.levicorpus": "Levicorpus"
+  "spell.sensorywizards.levicorpus": "Levicorpus",
+  "block.sensorywizards.wand_carver": "Wand Carver",
+  "screen.sensorywizards.wand_carver": "Wand Carver"
 }
 

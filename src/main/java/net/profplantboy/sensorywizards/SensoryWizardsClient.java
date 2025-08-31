@@ -1,13 +1,13 @@
-package net.profplantboy.sensorywizards;
+package net.profplantboy.sensorywizards.client;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.profplantboy.sensorywizards.client.input.KeyInputHandler;
+import net.minecraft.client.gui.screen.ingame.HandledScreens;
+import net.profplantboy.sensorywizards.client.screen.WandCarverScreen;
+import net.profplantboy.sensorywizards.screen.WandCarverScreenHandler;
 
 public class SensoryWizardsClient implements ClientModInitializer {
-
     @Override
     public void onInitializeClient() {
-        KeyInputHandler.register();
-        // The manual packet registration and handling are no longer needed here
+        HandledScreens.register(WandCarverScreenHandler.TYPE, WandCarverScreen::new);
     }
 }

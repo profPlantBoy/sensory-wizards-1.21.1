@@ -12,6 +12,7 @@ import net.profplantboy.sensorywizards.command.UnlearnSpellCommand;
 import net.profplantboy.sensorywizards.item.ModItems;
 import net.profplantboy.sensorywizards.network.CastSpellPayload;
 import net.profplantboy.sensorywizards.network.SelectSpellPayload;
+import net.profplantboy.sensorywizards.screen.WandCarverScreenHandler;
 import net.profplantboy.sensorywizards.spell.EquippedSpellComponent;
 import net.profplantboy.sensorywizards.spell.ModComponents;
 import net.profplantboy.sensorywizards.spell.SpellRegistry;
@@ -33,6 +34,8 @@ public class SensoryWizards implements ModInitializer {
         ModComponents.registerComponents();
         ModItems.registerModItems();
         ModBlocks.registerModBlocks();
+        ModBlocks.register();
+        WandCarverScreenHandler.register();
         registerPayloads();
         registerPacketHandlers();
 
