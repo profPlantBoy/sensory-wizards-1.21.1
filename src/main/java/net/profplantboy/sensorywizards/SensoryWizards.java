@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.item.ItemStack;
 
+import net.profplantboy.sensorywizards.block.ModBlocks;
 import net.profplantboy.sensorywizards.command.LearnSpellCommand;
 import net.profplantboy.sensorywizards.command.UnlearnSpellCommand;
 import net.profplantboy.sensorywizards.item.ModItems;
@@ -31,6 +32,7 @@ public class SensoryWizards implements ModInitializer {
         // Your existing init
         ModComponents.registerComponents();
         ModItems.registerModItems();
+        ModBlocks.registerModBlocks();
         registerPayloads();
         registerPacketHandlers();
 
