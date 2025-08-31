@@ -16,6 +16,16 @@ repositories {
         name = "Ladysnake Mods"
         url = 'https://maven.ladysnake.org/releases'
     }
+    maven {
+        name = "Shedaniel Maven"
+        url = "https://maven.shedaniel.me/"
+    }
+    maven {
+        name = "TerraformersMC"
+        url = "https://maven.terraformersmc.com/releases/"
+    }
+    mavenCentral()
+    maven { url = "https://maven.fabricmc.net/" }
 }
 
 fabricApi {
@@ -29,7 +39,7 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    modImplementation "com.github.shedaniel:cloth-config-fabric:14.0.126"
+    modImplementation "me.shedaniel.cloth:cloth-config-fabric:15.0.130"
     modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:6.1.2"
     modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-base:6.1.2"
 }

@@ -15,6 +15,9 @@ import net.profplantboy.sensorywizards.spell.ModComponents;
 import net.profplantboy.sensorywizards.spell.SpellRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import me.shedaniel.autoconfig.AutoConfig;
+import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
+import net.profplantboy.sensorywizards.config.SensoryWizardsConfig;
 
 public class SensoryWizards implements ModInitializer {
     public static final String MOD_ID = "sensorywizards";
@@ -27,6 +30,10 @@ public class SensoryWizards implements ModInitializer {
         registerPayloads();
         registerPacketHandlers();
 
+        AutoConfig.register(SensoryWizardsConfig.class, GsonConfigSerializer::new);
+
+        // make sure to call your SpellRegistry here if you don’t already
+        SpellRegistry.registerSpells();
         // Register both of your commands here
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             UnlearnSpellCommand.register(dispatcher);
