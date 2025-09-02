@@ -52,6 +52,8 @@
   "spell.sensorywizards.levicorpus": "Levicorpus",
   "block.sensorywizards.wand_carver": "Wand Carver",
   "screen.sensorywizards.wand_carver": "Wand Carver",
-  "itemGroup.sensorywizards": "Sensory Wizards"
+  "itemGroup.sensorywizards": "Sensory Wizards",
+  "key.sensorywizards.open_spell_wheel": "Open Spell Wheel",
+  "key.categories.sensorywizards": "Sensory Wizards"
 }
 

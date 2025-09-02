@@ -41,7 +41,7 @@ dependencies {
     // Cloth Config for config UI + AutoConfig
     // (v15.x is for 1.21/1.21.1)
     modImplementation "me.shedaniel.cloth:cloth-config-fabric:15.0.130"
-
+    include("me.shedaniel.cloth:cloth-config-fabric:15.0.127") // bundle it (optional but common)
     // Mod Menu (for the in-game Config button)
     // Use 'compileOnly' so Mod Menu is optional at runtime
     modCompileOnly "com.terraformersmc:modmenu:11.0.1"
